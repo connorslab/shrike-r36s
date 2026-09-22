@@ -90,6 +90,7 @@ def test_framebuffer_maps_only_visible_extent(monkeypatch):
         else:
             info.type, info.visual = 0, 2
             info.line_length, info.smem_len = 16, 4096
+    monkeypatch.setenv("R36S_FB_BACKEND", "mmap")
     def map_surface(fd, length, access):
         if length > 44:
             raise OSError(22, "Driver cannot map the reserved VRAM")
@@ -118,6 +119,7 @@ def test_framebuffer_write_fallback_preserves_padding(monkeypatch, mapping_errno
         else:
             info.type, info.visual = 0, 2
             info.line_length, info.smem_len = 16, 64
+    monkeypatch.setenv("R36S_FB_BACKEND", "mmap")
     def no_mapping(*args, **kwargs):
         raise OSError(mapping_errno, "Mapping unsupported")
     storage = bytearray([99] * 64)
@@ -141,3 +143,23 @@ def test_framebuffer_write_fallback_preserves_padding(monkeypatch, mapping_errno
     with pytest.raises(OSError, match="no progress"):
         screen.cleanup()
     assert closed == [123]
+
+
+def test_default_display_never_calls_blocking_mmap(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+    import framebuffer as adapter
+    def ioctl(fd, command, info):
+        if command == 0x4600:
+            info.xres, info.yres, info.bits_per_pixel = 2, 2, 32
+        else:
+            info.type, info.visual, info.line_length, info.smem_len = 0, 2, 8, 16
+    monkeypatch.delenv("R36S_FB_BACKEND", raising=False)
+    monkeypatch.setitem(sys.modules, "fcntl", SimpleNamespace(ioctl=ioctl))
+    monkeypatch.setattr(adapter.os, "open", lambda *args: 123)
+    monkeypatch.setattr(adapter.os, "close", lambda fd: None)
+    def forbidden(*args, **kwargs):
+        pytest.fail("Default startup must not enter the blocking mapping call")
+    monkeypatch.setattr(adapter.mmap, "mmap", forbidden)
+    screen = adapter.Framebuffer(123)
+    assert screen.buffer is None

@@ -75,14 +75,18 @@ class Framebuffer:
                 raise RuntimeError("Invalid framebuffer bounds")
             # Map only the surface we use, excluding unused framebuffer memory.
             mapped_length = self.offset + (v.yres - 1) * f.line_length + self.row_bytes
-            try:
-                self.buffer = mmap.mmap(self.fd, mapped_length, access=mmap.ACCESS_WRITE)
-            except OSError as exc:
-                if exc.errno not in (errno.EINVAL, errno.ENODEV, errno.ENOSYS):
-                    raise
-                # Some ArkOS display states reject mmap while fbdev writes work.
-                # Keep the same pixel layout and bounds for the write fallback.
-                self.buffer = None
+            self.buffer = None
+            backend = os.environ.get("R36S_FB_BACKEND", "write")
+            if backend not in ("write", "mmap"):
+                raise ValueError("R36S_FB_BACKEND must be write or mmap")
+            # The R36XS driver can block inside mmap indefinitely, so waiting
+            # for an exception before falling back is insufficient. Prefer writes.
+            if backend == "mmap":
+                try:
+                    self.buffer = mmap.mmap(self.fd, mapped_length, access=mmap.ACCESS_WRITE)
+                except OSError as exc:
+                    if exc.errno not in (errno.EINVAL, errno.ENODEV, errno.ENOSYS):
+                        raise
         except BaseException:
             os.close(self.fd)
             raise

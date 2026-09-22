@@ -135,8 +135,8 @@ The saved R36XS device report contains 704/705 and does not expose 314/315.
 Other controller names retain the original mapping.
 
 Startup error dialogs return automatically after 15 seconds because the ports
-do not provide a gamepad-to-terminal keyboard translator. Display writes can
-fall back to direct writes if framebuffer memory mapping is unavailable.
+do not provide a gamepad-to-terminal keyboard translator. Display output uses direct writes by default because the R36XS driver can
+hang inside framebuffer memory mapping before a fallback can run.
 
 To update without SSH, overwrite the launcher and its matching folder on the
 game card with the new ZIP contents. Keep existing wallet data and runtime

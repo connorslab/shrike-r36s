@@ -99,3 +99,14 @@ help dismissal, exit chord and preservation of the original device mapping.
 Combined adapter tests: 63 passed. No new on-device test has been performed.
 SeedSigner's original display/startup failure remains unresolved; bounded
 preflight, cleanup and error dialogs improve recovery without claiming a fix.
+
+
+### Saved trace recovered after remote services returned
+
+SeedSigner's preflight trace repeatedly stopped inside `mmap` for more than
+100 seconds. The exception-based fallback cannot help when that call never
+returns. Both adapters now default to positional writes without attempting
+mapping. An explicit `R36S_FB_BACKEND=mmap` remains available to direct adapter
+callers, with the previous unsupported-mapping fallback. The launcher uses the
+write default. New regression tests assert default startup never calls mmap.
+Combined adapter suites: 65 passed. Device UI acceptance is still pending.
