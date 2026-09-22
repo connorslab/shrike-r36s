@@ -2,7 +2,7 @@
 
 An experimental handheld package for **[privkeyio/shrike](https://github.com/privkeyio/shrike)**, the Sparrow fork supporting BLAKE2b proof of work and unified opt-in signatures. This repository preserves its upstream source and history, adding the compatibility adapter in `ports/r36s/`.
 
-**Status:** packaged and host-tested; physical handheld testing remains outstanding. Begin with a disposable test wallet, not real funds.
+**Status:** experimental; remote startup has reached the controls screen on an R36XS, while normal Ports launch and wallet acceptance remain outstanding. Begin with a disposable test wallet, not real funds.
 
 ## Install
 
@@ -52,7 +52,7 @@ With the keyboard open, A types and B erases. Close the main Shrike window norma
 
 Wallets, configuration and Shrike logs persist in **`~/.shrike`**, usually `/home/ark/.shrike`. The runtime is separate at `~/.local/share/shrike-r36s/v26/rootfs`. Back up wallets while Shrike is closed; copying Ports alone is not a wallet backup. Use wallet encryption for saved private keys.
 
-30 adapter tests passed. Archive hashes, launcher syntax and native-library requirements were checked. No physical handheld, chain backend, camera or hardware wallet was available. The upstream Java suite was not rerun for this packaging-only port. See [validation](ports/r36s/TESTING.md).
+30 adapter tests passed. Archive hashes, launcher syntax and native-library requirements were checked. A subsequent R36XS session completed runtime setup and reached the controls overlay with the wallet process running. Chain backend, camera, hardware wallet and signing checks remain outstanding. The upstream Java suite was not rerun for this packaging-only port. See [validation](ports/r36s/TESTING.md).
 
 Performance will be lower than a PC. Desktop dependencies come from Ubuntu's signed repositories at first setup, so this is not a fully reproducible OS image.
 

@@ -25,9 +25,10 @@ Shrike release: `v2.5.5-blake2b.26`, source commit
 
 ## Not yet performed
 
-No physical R36S/R36X, ARM Linux emulator, camera, hardware wallet, or chain
-backend was connected. The chroot bootstrap, desktop startup, native input and
-display drivers, memory consumption and performance remain hardware tests.
+At initial release, no physical R36S/R36X, ARM Linux emulator, camera, hardware
+wallet, or chain backend was connected. See the follow-up below for subsequent
+R36XS runtime setup and startup checks. Full interaction, memory consumption,
+performance and signing acceptance remain outstanding.
 These host tests do not prove the package boots or signs correctly on a device.
 The upstream Java wallet test suite was not run for this packaging-only port.
 
@@ -49,3 +50,18 @@ The upstream Java wallet test suite was not run for this packaging-only port.
 From this port's source directory, install `pytest`, `Pillow`, `numpy` and
 `python-xlib`, then run `python -m pytest tests -q`. Hardware-independent tests
 use simulated X/input/framebuffer interfaces; they do not access wallet files.
+
+## R36XS troubleshooting follow-up
+
+On the user's ARM64 ArkOS R36XS, the runtime files verified successfully.
+The SeedSigner display/gamepad/import preflight passed, and the user confirmed
+that a timed remote test displayed a usable SeedSigner UI. Camera operations
+reported the expected missing-UVC-camera error. Shrike reached its controls
+screen and its wallet process remained running during a timed test.
+
+Remote tests must pause EmulationStation to prevent competing screen updates.
+A diagnostic timeout is not evidence of an application crash. The launchers now
+enter Linux console graphics mode for framebuffer rendering and restore the
+previous mode on exit, including before displaying a session error. Normal Ports
+launch acceptance is still awaiting user confirmation. No signing or funds
+validation was performed.

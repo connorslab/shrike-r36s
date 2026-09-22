@@ -15,7 +15,7 @@ fi
 if ! sudo -n true; then
     message 'ArkOS passwordless sudo is required to start the private runtime and open the screen/gamepad.'; exit 1
 fi
-for command_name in unshare chroot mount flock sha256sum tar; do
+for command_name in unshare chroot mount flock sha256sum tar python3; do
     if ! command -v "$command_name" >/dev/null; then
         message "ArkOS is missing a required system tool: $command_name"; exit 1
     fi
@@ -30,10 +30,20 @@ if [[ ! -e "$INSTALL/rootfs/.desktop-ready" ]]; then
     command -v dialog >/dev/null && dialog --title 'Shrike R36S' --infobox 'First launch: preparing the desktop runtime. Internet is required. This may take several minutes; keep power connected.' 8 65 || true
 fi
 LOG="$(mktemp /dev/shm/shrike-start.XXXXXXXX)"
-trap 'rm -f -- "$LOG"' EXIT
+CONSOLE_MODE=""
+restore_console() {
+    if [[ -n "$CONSOLE_MODE" ]]; then
+        sudo -n python3 -B "$PORT/console.py" "$CONSOLE_MODE" || true
+        CONSOLE_MODE=""
+    fi
+}
+cleanup() { restore_console; rm -f -- "$LOG"; }
+trap cleanup EXIT
+CONSOLE_MODE="$(sudo -n python3 -B "$PORT/console.py" enter)"
 # A private mount namespace keeps runtime mounts out of the ArkOS desktop.
 # The network namespace is shared: Wi-Fi and other ArkOS connections remain usable.
 if ! sudo -n unshare --mount --propagation private -- /bin/bash "$PORT/runtime.sh" "$PORT" "$INSTALL" "$WALLETS" "$(id -u)" "$(id -g)" > "$LOG" 2>&1; then
+    restore_console
     if command -v dialog >/dev/null; then
         dialog --title 'Shrike startup/session error (temporary log)' --textbox "$LOG" 20 74
     else cat "$LOG"; read -r -p 'Press Enter.' || true; fi
