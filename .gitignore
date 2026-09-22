@@ -6,4 +6,8 @@ build
 out
 *.log
 build-*.sh
+ports/r36s/.cache/
+ports/r36s/dist/
+__pycache__/
+.pytest_cache/
 .DS_Store

@@ -1,0 +1,7 @@
+[
+  {"name":"shrike-2.5.5-26-aarch64.tar.gz","url":"https://github.com/privkeyio/shrike/releases/download/v2.5.5-blake2b.26/shrike-2.5.5-26-aarch64.tar.gz","sha256":"148f2b4ac8149a167b1dd875aea93eeadd6d20c9a892ec2bab2bcee445905ed9"},
+  {"name":"ubuntu-base-24.04.5-base-arm64.tar.gz","url":"https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.5-base-arm64.tar.gz","sha256":"a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2"},
+  {"name":"SHA256SUMS","url":"https://github.com/privkeyio/shrike/releases/download/v2.5.5-blake2b.26/SHA256SUMS","sha256":"5b819c0a356e3382c08f06416bea38eb5b8fa2b7be17a8bddb08016519d638fd"},
+  {"name":"SHA256SUMS.asc","url":"https://github.com/privkeyio/shrike/releases/download/v2.5.5-blake2b.26/SHA256SUMS.asc","sha256":"61253cfcc5366f50e1eedd9efe7ca5a805b2ef6d8f8c8fc24ff31faa4ae2fb07"},
+  {"name":"privkeyio-signing-key.asc","url":"https://github.com/privkeyio/shrike/releases/download/v2.5.5-blake2b.26/privkeyio-signing-key.asc","sha256":"3d52259b66bda1825cd0d223b15fd237e1cbe8640d79c8980929935056cf8853"}
+]

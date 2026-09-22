@@ -1,0 +1,8 @@
+{
+  "input_device": null,
+  "framebuffer": "/dev/fb0",
+  "desktop_width": 1280,
+  "desktop_height": 960,
+  "fps": 8,
+  "buttons": {}
+}
