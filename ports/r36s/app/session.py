@@ -14,7 +14,7 @@ import subprocess
 import tempfile
 import time
 
-from controls import BUTTONS, Controls
+from controls import Controls, mapping_for_device
 from framebuffer import Framebuffer
 
 
@@ -53,7 +53,9 @@ def main():
     if not fb_path.startswith("/dev/fb"):
         raise ValueError("framebuffer must be a Linux fbdev device")
     fb_fd = os.open(fb_path, os.O_RDWR)
-    input_fd = os.open(input_path(config), os.O_RDONLY | os.O_NONBLOCK)
+    device = input_path(config)
+    device_name = Path("/sys/class/input", Path(device).name, "device/name").read_text()
+    input_fd = os.open(device, os.O_RDONLY | os.O_NONBLOCK)
     fcntl.ioctl(input_fd, 0x40044590, 1)  # EVIOCGRAB
     # No privileged code runs after this point. The open device descriptors are
     # retained only by this process; child processes have close_fds=True.
@@ -66,7 +68,7 @@ def main():
     width, height = int(config.get("desktop_width", 1280)), int(config.get("desktop_height", 960))
     if not (1024 <= width <= 1920 and 768 <= height <= 1440):
         raise ValueError("Desktop dimensions must be within 1024x768 and 1920x1440")
-    mapping = {int(k): v for k, v in config.get("buttons", {}).items()} or BUTTONS
+    mapping = {int(k): v for k, v in config.get("buttons", {}).items()} or mapping_for_device(device_name)
     state = Controls(width, height, mapping)
     xvfb = wm = app = None
     connection = None

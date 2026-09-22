@@ -2,7 +2,7 @@
 
 An experimental handheld package for **[privkeyio/shrike](https://github.com/privkeyio/shrike)**, the Sparrow fork supporting BLAKE2b proof of work and unified opt-in signatures. This repository preserves its upstream source and history, adding the compatibility adapter in `ports/r36s/`.
 
-**Status:** experimental; remote startup has reached the controls screen on an R36XS, while normal Ports launch and wallet acceptance remain outstanding. Begin with a disposable test wallet, not real funds.
+**Status:** experimental; normal Ports launch reaches the controls screen on an R36XS; a controller-mapping correction has host tests but still needs device acceptance. Begin with a disposable test wallet, not real funds.
 
 ## Install
 
@@ -65,3 +65,10 @@ Performance will be lower than a PC. Desktop dependencies come from Ubuntu's sig
 - Release ZIPs record the baseline in `UPSTREAM.txt` and the packaging commit in `PORT_SOURCE.txt`.
 
 Upstream: Apache 2.0 [LICENSE](LICENSE). Adapter: MIT [LICENSE](ports/r36s/LICENSE). Ubuntu components retain their respective licenses.
+
+## Latest compatibility fixes
+
+GO-Super gamepads now use their ArkOS A/B and Select/Start layout. Startup error
+dialogs return automatically instead of waiting indefinitely for a keyboard.
+See [port instructions](ports/r36s/README.md) and [test evidence](ports/r36s/TESTING.md)
+for changes, installation and remaining device checks.

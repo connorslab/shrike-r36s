@@ -4,6 +4,16 @@ import math
 BUTTONS = {304: "click", 305: "right", 307: "enter", 308: "keyboard",
            310: "scroll_up", 311: "scroll_down", 312: "zoom", 313: "slow",
            314: "select", 315: "start"}
+
+def mapping_for_device(name):
+    mapping = dict(BUTTONS)
+    if "go-super" in name.lower() or "odroid go super" in name.lower():
+        mapping.update({305: "click", 304: "right", 704: "select", 705: "start"})
+        mapping.pop(314)
+        mapping.pop(315)
+    return mapping
+
+
 DIRECTIONS = {544: (0, -1), 545: (0, 1), 546: (-1, 0), 547: (1, 0)}
 ROWS = [list("1234567890-=`"), list("qwertyuiop[]"), list("asdfghjkl;'"),
         list("zxcvbnm,./\\"), ["Shift", "Space", "Backspace", "Tab", "Enter", "Hide"]]

@@ -5,8 +5,8 @@ upstream ARM64 desktop application and bundled Java unchanged, with a private
 Ubuntu 24.04 userspace and handheld display/input adapter. Networking remains
 enabled through ArkOS's Wi-Fi adapter, built-in Wi-Fi, or other working connection.
 
-This package has not yet been run on physical R36S/R36X hardware. Begin with a
-disposable test wallet, not real funds. Hardware clones may need mapping changes.
+On the R36XS, normal Ports launch has reached the help page; usable wallet
+interaction remains unverified. Hardware revisions may need mapping changes.
 
 ## Install
 
@@ -123,3 +123,21 @@ Ubuntu Base: https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/
 
 Shrike retains its upstream Apache 2.0 license; Ubuntu components retain their
 individual licenses. The local adapter is MIT licensed; see `LICENSE`.
+
+
+## R36XS compatibility follow-up
+
+The GO-Super gamepad layout is detected by its Linux device name. It uses
+A=305, B=304, Select=704 and Start=705, rather than the adapter's original
+304/305 and 314/315 assumptions. Explicit button mappings still take priority.
+The matching ArkOS layout is documented in the [ArkOS key-code reference](https://github.com/christianhaitian/arkos/wiki/Key-codes-and-Global-Hotkey-config-file-locations).
+The saved R36XS device report contains 704/705 and does not expose 314/315.
+Other controller names retain the original mapping.
+
+Startup error dialogs return automatically after 15 seconds because the ports
+do not provide a gamepad-to-terminal keyboard translator. Display writes can
+fall back to direct writes if framebuffer memory mapping is unavailable.
+
+To update without SSH, overwrite the launcher and its matching folder on the
+game card with the new ZIP contents. Keep existing wallet data and runtime
+folders. These changes have host test coverage but still need device acceptance.

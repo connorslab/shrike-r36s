@@ -147,3 +147,26 @@ def test_select_toggles_help_without_sending_wallet_key():
     assert state.event(1, 314, 1) == []
     assert state.event(1, 314, 0) == []
     assert state.help
+
+
+@pytest.mark.parametrize("name", ["GO-Super Gamepad", "ODROID GO SUPER Gamepad"])
+def test_go_super_help_and_exit(name):
+    from controls import mapping_for_device
+    state = Controls(mapping=mapping_for_device(name))
+    assert state.event(1, 305, 1) == []
+    assert not state.help
+    state.event(1, 305, 0)
+    assert state.event(1, 305, 1) == [("button_down", 1)]
+    assert state.event(1, 304, 1) == [("button_down", 3)]
+    state.event(1, 704, 1)
+    state.event(1, 704, 0)
+    assert state.help
+    state.event(1, 704, 1)
+    assert state.event(1, 705, 1) == [("close_window", None)]
+
+
+def test_device_mapping_does_not_modify_other_devices():
+    from controls import BUTTONS, mapping_for_device
+    mapping_for_device("GO-Super Gamepad")
+    assert mapping_for_device("retrogame_joypad") == BUTTONS
+    assert BUTTONS[304] == "click" and BUTTONS[314] == "select"

@@ -87,3 +87,15 @@ bytes and read back identical bytes. The combined host adapter suites passed
 57 tests, including partial writes and descriptor cleanup after write failure.
 This confirms the fallback transport, not a successful normal Ports launch.
 User-visible launch, controls, exit and wallet acceptance remain pending.
+
+
+### Offline code review follow-up
+
+The user subsequently reported SeedSigner still black, and Shrike reaching its
+help page from Ports but not dismissing it. Remote troubleshooting was stopped
+at the user's request. The saved gamepad capabilities and ArkOS GO-Super layout
+identify a mapping mismatch; host tests now cover its A/B and Select/Start codes,
+help dismissal, exit chord and preservation of the original device mapping.
+Combined adapter tests: 63 passed. No new on-device test has been performed.
+SeedSigner's original display/startup failure remains unresolved; bounded
+preflight, cleanup and error dialogs improve recovery without claiming a fix.
