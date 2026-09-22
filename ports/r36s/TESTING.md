@@ -14,7 +14,7 @@ Shrike release: `v2.5.5-blake2b.26`, source commit
 * Upstream Shrike ARM64 archive SHA256 matches the upstream release manifest.
 * The manifest's signature mathematically verifies with the key published in
   the same release, fingerprint `A47D99B6DB0D715D40C59A2023AE8A8EA7E24E38`.
-  The README footer names a different older key. This check uses the release
+  The README footer names a different key. This check uses the release
   key; it does not independently authenticate the publisher or establish
   revocation status. Signature verification used PGPy on the build host.
 * Ubuntu Base archive SHA256 matches Canonical's published manifest.
