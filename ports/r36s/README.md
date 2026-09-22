@@ -1,12 +1,16 @@
 # Shrike for R36S / R36X on ArkOS
 
+**Verified on R36XS / ArkOS:** the user confirmed that both apps open from Ports and run properly. This verifies launch and basic controls, not every wallet operation.
+
+The mDNS update additionally passed on-device hostname resolution and a TCP connection to the Electrum endpoint as the wallet user. Wallet saving/reopening, full synchronization and signing remain unverified; the reported wallet-save issue is unresolved.
+
 Experimental handheld launcher for **Shrike v2.5.5-blake2b.26**. Uses the
 upstream ARM64 desktop application and bundled Java unchanged, with a private
 Ubuntu 24.04 userspace and handheld display/input adapter. Networking remains
 enabled through ArkOS's Wi-Fi adapter, built-in Wi-Fi, or other working connection.
 
-On the R36XS, normal Ports launch has reached the help page; usable wallet
-interaction remains unverified. Hardware revisions may need mapping changes.
+On the R36XS, normal Ports launch and basic operation are confirmed; full wallet
+acceptance remains incomplete. Hardware revisions may need mapping changes.
 
 ## Install
 

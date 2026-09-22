@@ -2,7 +2,9 @@
 
 An experimental handheld package for **[privkeyio/shrike](https://github.com/privkeyio/shrike)**, the Sparrow fork supporting BLAKE2b proof of work and unified opt-in signatures. This repository preserves its upstream source and history, adding the compatibility adapter in `ports/r36s/`.
 
-**Status:** experimental; the user confirmed normal launch and basic operation on an R36XS; wallet persistence, synchronization and signing acceptance remain outstanding. Begin with a disposable test wallet, not real funds.
+**Verified on R36XS / ArkOS:** the user confirmed that both apps open from Ports and run properly. This verifies launch and basic controls, not every wallet operation.
+
+The mDNS update additionally passed on-device hostname resolution and a TCP connection to the Electrum endpoint as the wallet user. Wallet saving/reopening, full synchronization and signing remain unverified; the reported wallet-save issue is unresolved.
 
 ## Install
 

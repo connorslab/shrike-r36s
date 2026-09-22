@@ -1,5 +1,17 @@
 # Shrike R36S validation â€” 2026-09-21
 
+## Current verification status — 2026-09-22
+
+**Verified on R36XS / ArkOS:** the user confirmed that both apps open from Ports and run properly. This verifies launch and basic controls, not every wallet operation.
+
+The mDNS update additionally passed on-device hostname resolution and a TCP connection to the Electrum endpoint as the wallet user. Wallet saving/reopening, full synchronization and signing remain unverified; the reported wallet-save issue is unresolved.
+
+The dated results below preserve the troubleshooting history. Earlier statements
+that normal Ports launch was pending are superseded by this confirmation.
+Release r36s-v0.1.3 is published as a normal release with this limited
+verification scope. Its existing code tag and ZIP remain unchanged; current
+release notes and repository documentation record the later confirmation.
+
 Shrike release: `v2.5.5-blake2b.26`, source commit
 `7a2d0f83dd6b6d953611ea1083021fae44c3784e`.
 
