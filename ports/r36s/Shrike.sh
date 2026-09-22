@@ -1,5 +1,7 @@
 #!/bin/bash
 set -euo pipefail
+# Undo ArkOS's nice -19 Ports wrapper before starting the desktop runtime.
+renice -n 0 -p "$$" >/dev/null
 umask 077
 ulimit -c 0
 PORT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/shrike-r36s"

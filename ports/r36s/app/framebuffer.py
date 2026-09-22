@@ -1,5 +1,6 @@
 """Linux framebuffer adapter shared with the local SeedSigner R36S port."""
 import ctypes as C
+import errno
 import glob
 import json
 import mmap
@@ -72,7 +73,16 @@ class Framebuffer:
             if (not v.xres or not v.yres or self.row_bytes > f.line_length or
                     self.offset + (v.yres - 1) * f.line_length + self.row_bytes > f.smem_len):
                 raise RuntimeError("Invalid framebuffer bounds")
-            self.buffer = mmap.mmap(self.fd, f.smem_len, access=mmap.ACCESS_WRITE)
+            # Map only the surface we use, excluding unused framebuffer memory.
+            mapped_length = self.offset + (v.yres - 1) * f.line_length + self.row_bytes
+            try:
+                self.buffer = mmap.mmap(self.fd, mapped_length, access=mmap.ACCESS_WRITE)
+            except OSError as exc:
+                if exc.errno not in (errno.EINVAL, errno.ENODEV, errno.ENOSYS):
+                    raise
+                # Some ArkOS display states reject mmap while fbdev writes work.
+                # Keep the same pixel layout and bounds for the write fallback.
+                self.buffer = None
         except BaseException:
             os.close(self.fd)
             raise
@@ -85,11 +95,31 @@ class Framebuffer:
         screen.paste(image.convert("RGB").resize(size, Image.Resampling.NEAREST),
                      ((v.xres - size[0]) // 2, (v.yres - size[1]) // 2))
         raw = pack_pixels(screen, v.bits_per_pixel, [v.red, v.green, v.blue, v.transp])
-        for row in range(v.yres):
-            start = self.offset + row * self.fix.line_length
-            self.buffer[start:start + self.row_bytes] = raw[row * self.row_bytes:(row + 1) * self.row_bytes]
+        if self.fix.line_length == self.row_bytes:
+            self._write_pixels(self.offset, raw)
+        else:
+            for row in range(v.yres):
+                start = self.offset + row * self.fix.line_length
+                self._write_pixels(start, raw[row * self.row_bytes:(row + 1) * self.row_bytes])
+
+    def _write_pixels(self, offset, data):
+        if self.buffer is not None:
+            self.buffer[offset:offset + len(data)] = data
+            return
+        remaining = memoryview(data)
+        while remaining:
+            count = os.pwrite(self.fd, remaining, offset)
+            if count <= 0:
+                raise OSError(errno.EIO, "Framebuffer write made no progress")
+            offset += count
+            remaining = remaining[count:]
 
     def cleanup(self):
-        self.show_image(Image.new("RGB", (320, 240)))
-        self.buffer.close()
-        os.close(self.fd)
+        try:
+            self.show_image(Image.new("RGB", (320, 240)))
+        finally:
+            try:
+                if self.buffer is not None:
+                    self.buffer.close()
+            finally:
+                os.close(self.fd)

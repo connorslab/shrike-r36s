@@ -63,5 +63,27 @@ Remote tests must pause EmulationStation to prevent competing screen updates.
 A diagnostic timeout is not evidence of an application crash. The launchers now
 enter Linux console graphics mode for framebuffer rendering and restore the
 previous mode on exit, including before displaying a session error. Normal Ports
-launch acceptance is still awaiting user confirmation. No signing or funds
+launches subsequently failed; see the framebuffer follow-up below. No signing or funds
 validation was performed.
+
+
+### Framebuffer failure observed on 2026-09-22
+
+A normal SeedSigner Ports launch failed in `mmap` with `EINVAL`, after all
+application imports completed. The requested and reported framebuffer sizes
+were both 1,228,800 bytes (640 x 480, 32-bit pixels, 2,560-byte stride), so
+reducing the mapping to the visible extent did not resolve that failure.
+The underlying reason for the difference from SSH startup is not yet known.
+
+Both framebuffer adapters now fall back to positional framebuffer writes when
+the driver rejects mapping with EINVAL, ENODEV or ENOSYS. The fallback preserves
+row padding and offsets, handles partial writes, and fails on a stalled write.
+Contiguous surfaces are written in one operation when possible. Other mapping
+errors still propagate. Both launchers also reset the inherited ArkOS Ports
+nice priority to normal; this change alone did not fix the black screen.
+
+On the R36XS, a forced-fallback diagnostic rewrote all 1,228,800 existing display
+bytes and read back identical bytes. The combined host adapter suites passed
+57 tests, including partial writes and descriptor cleanup after write failure.
+This confirms the fallback transport, not a successful normal Ports launch.
+User-visible launch, controls, exit and wallet acceptance remain pending.

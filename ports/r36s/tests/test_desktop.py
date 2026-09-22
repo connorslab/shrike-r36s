@@ -1,3 +1,4 @@
+import errno
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -74,3 +75,69 @@ def test_rgb565(color, expected):
 def test_rgb8888():
     fields = [Bitfield(16, 8, 0), Bitfield(8, 8, 0), Bitfield(0, 8, 0), Bitfield(24, 8, 0)]
     assert pack_pixels(Image.new("RGB", (1, 1), (1, 2, 3)), 32, fields) == b"\x03\x02\x01\xff"
+
+
+def test_framebuffer_maps_only_visible_extent(monkeypatch):
+    """A driver can advertise more VRAM than its current surface can mmap."""
+    import sys
+    from types import SimpleNamespace
+    import framebuffer as adapter
+    def ioctl(fd, command, info):
+        if command == 0x4600:
+            info.xres, info.yres = 2, 2
+            info.xoffset, info.yoffset = 1, 1
+            info.bits_per_pixel = 32
+        else:
+            info.type, info.visual = 0, 2
+            info.line_length, info.smem_len = 16, 4096
+    def map_surface(fd, length, access):
+        if length > 44:
+            raise OSError(22, "Driver cannot map the reserved VRAM")
+        return bytearray(length)
+    monkeypatch.setitem(sys.modules, "fcntl", SimpleNamespace(ioctl=ioctl))
+    monkeypatch.setattr(adapter.os, "open", lambda *args: 123)
+    monkeypatch.setattr(adapter.os, "close", lambda fd: None)
+    monkeypatch.setattr(adapter.mmap, "mmap", map_surface)
+    screen = adapter.Framebuffer(123)
+    assert screen.offset == 20
+    assert len(screen.buffer) == 44
+
+
+@pytest.mark.parametrize("mapping_errno", [errno.EINVAL, errno.ENODEV, errno.ENOSYS])
+def test_framebuffer_write_fallback_preserves_padding(monkeypatch, mapping_errno):
+    import sys
+    from types import SimpleNamespace
+    import framebuffer as adapter
+    from PIL import Image
+    def ioctl(fd, command, info):
+        if command == 0x4600:
+            info.xres, info.yres = 2, 2
+            info.xoffset, info.yoffset = 1, 1
+            info.bits_per_pixel = 32
+            info.red, info.green, info.blue = adapter.Bitfield(16, 8, 0), adapter.Bitfield(8, 8, 0), adapter.Bitfield(0, 8, 0)
+        else:
+            info.type, info.visual = 0, 2
+            info.line_length, info.smem_len = 16, 64
+    def no_mapping(*args, **kwargs):
+        raise OSError(mapping_errno, "Mapping unsupported")
+    storage = bytearray([99] * 64)
+    def partial_write(fd, data, offset):
+        count = min(3, len(data))
+        storage[offset:offset + count] = data[:count]
+        return count
+    closed = []
+    monkeypatch.setitem(sys.modules, "fcntl", SimpleNamespace(ioctl=ioctl))
+    monkeypatch.setattr(adapter.os, "open", lambda *args: 123)
+    monkeypatch.setattr(adapter.os, "close", closed.append)
+    monkeypatch.setattr(adapter.os, "pwrite", partial_write, raising=False)
+    monkeypatch.setattr(adapter.mmap, "mmap", no_mapping)
+    screen = adapter.Framebuffer(123)
+    assert screen.buffer is None
+    screen.show_image(Image.new("RGB", (2, 2), "red"))
+    assert storage[20:28] == storage[36:44] == b"\x00\x00\xff\x00" * 2
+    assert storage[:20] == bytes([99] * 20)
+    assert storage[28:36] == bytes([99] * 8)
+    monkeypatch.setattr(adapter.os, "pwrite", lambda *args: 0)
+    with pytest.raises(OSError, match="no progress"):
+        screen.cleanup()
+    assert closed == [123]
