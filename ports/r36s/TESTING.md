@@ -110,3 +110,18 @@ mapping. An explicit `R36S_FB_BACKEND=mmap` remains available to direct adapter
 callers, with the previous unsupported-mapping fallback. The launcher uses the
 write default. New regression tests assert default startup never calls mmap.
 Combined adapter suites: 65 passed. Device UI acceptance is still pending.
+
+
+### mDNS follow-up
+
+The user confirmed both apps open and run after the display/controller fixes.
+ArkOS and the private runtime had no working mDNS resolver. This update installs
+the NSS module and Avahi inside the runtime, supports already-installed desktops,
+and configures a resolver-only private daemon when ArkOS has none.
+
+On the R36XS, two fresh private-namespace sessions resolved umbrel-knots.local to
+192.168.1.156 and connected to TCP port 50004. The second ran lookup and connection
+as UID/GID 1002 (the wallet account), without reinstalling packages. No private
+Avahi daemon remained afterward. Host adapter tests: 41 passed. The alternate
+host-Avahi-socket branch has not been exercised on this device. TLS validation,
+full wallet synchronization and signing are not established by this check.

@@ -141,3 +141,22 @@ hang inside framebuffer memory mapping before a fallback can run.
 To update without SSH, overwrite the launcher and its matching folder on the
 game card with the new ZIP contents. Keep existing wallet data and runtime
 folders. These changes have host test coverage but still need device acceptance.
+
+
+## Local server names (.local / mDNS)
+
+Names such as `umbrel-knots.local` are supported. On the first launch after this
+update, the private Ubuntu runtime installs `libnss-mdns` and `avahi-daemon`;
+internet access is needed for that one-time upgrade. Later launches reuse them.
+If ArkOS already provides an Avahi lookup socket, the runtime reuses it.
+Otherwise it starts a private resolver for the session and stops it on exit.
+It publishes no services and does not change ArkOS resolver settings.
+
+The handheld and server must be on a LAN that permits multicast discovery.
+Choose the SSL setting advertised by your server; a port number alone does not
+specify whether TLS is enabled. The tested `umbrel-knots.local:50004` endpoint
+responded using plain TCP (SSL off).
+
+For a resolver-only test, run `runtime.sh` with its normal five arguments plus
+`--check-mdns HOSTNAME PORT` inside the normal private mount namespace. This
+checks lookup and TCP connectivity as the wallet user, without opening a wallet.

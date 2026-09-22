@@ -58,6 +58,44 @@ if [[ ! -f "$ROOT/.desktop-ready" ]]; then
     [[ "$(chroot "$ROOT" id -u wallet)" == "$USER_ID" ]]
     touch "$ROOT/.desktop-ready"
 fi
+# Upgrade existing runtimes as well as fresh installations.
+if [[ "$(chroot "$ROOT" dpkg-query -W -f='${Status}' libnss-mdns 2>/dev/null || true)" != "install ok installed" ]] ||
+   [[ "$(chroot "$ROOT" dpkg-query -W -f='${Status}' avahi-daemon 2>/dev/null || true)" != "install ok installed" ]]; then
+    echo 'Installing local-name resolution in the private runtime.'
+    chroot "$ROOT" /usr/bin/env DEBIAN_FRONTEND=noninteractive /bin/bash -c '
+        set -e
+        apt-get update
+        dpkg --configure -a
+        apt-get install -y --no-install-recommends libnss-mdns avahi-daemon
+        apt-get clean
+    '
+fi
+python3 "$PORT/mdns.py" "$ROOT"
+MDNS_PRIVATE=0
+cleanup_mdns() {
+    if [[ "$MDNS_PRIVATE" == 1 ]]; then
+        chroot "$ROOT" /usr/sbin/avahi-daemon --kill || true
+    fi
+}
+trap cleanup_mdns EXIT
+if [[ -S /run/avahi-daemon/socket ]]; then
+    # Reuse an existing host resolver, exposing only its local lookup socket.
+    mkdir -p "$ROOT/run/avahi-daemon"
+    mount --bind /run/avahi-daemon "$ROOT/run/avahi-daemon"
+    mount -o remount,bind,ro "$ROOT/run/avahi-daemon"
+else
+    # This daemon owns a private PID/socket directory and publishes no services.
+    chroot "$ROOT" /usr/sbin/avahi-daemon --daemonize --no-chroot --file=/etc/avahi/shrike-mdns.conf
+    MDNS_PRIVATE=1
+fi
+# Diagnostic mode exercises the same resolver without opening a wallet.
+if [[ "${6:-}" == "--check-mdns" ]]; then
+    chroot --userspec="$USER_ID:$GROUP_ID" "$ROOT" /usr/bin/getent ahostsv4 "${7:?Missing hostname}"
+    if [[ -n "${8:-}" ]]; then
+        chroot --userspec="$USER_ID:$GROUP_ID" "$ROOT" /usr/bin/python3 -c 'import socket,sys; socket.create_connection((sys.argv[1], int(sys.argv[2])), timeout=5).close(); print("Server TCP connection: OK")' "$7" "$8"
+    fi
+    exit 0
+fi
 mkdir -p "$ROOT/opt/r36s-port" "$ROOT/home/wallet/.shrike" "$ROOT/run/user-wallet"
 cp -r "$PORT/app/." "$ROOT/opt/r36s-port/"
 chown -R 0:0 "$ROOT/opt/r36s-port"

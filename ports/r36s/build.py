@@ -40,7 +40,7 @@ def main():
     with zipfile.ZipFile(release, "w", compression=zipfile.ZIP_STORED) as z:
         for item, path in inputs:
             z.write(path, "shrike-r36s/" + item["name"])
-        files = [ROOT / name for name in ("Shrike.sh", "runtime.sh", "console.py", "README.md", "TESTING.md", "downloads.json", "LICENSE", "UPSTREAM-LICENSE", "build.py")]
+        files = [ROOT / name for name in ("Shrike.sh", "runtime.sh", "mdns.py", "console.py", "README.md", "TESTING.md", "downloads.json", "LICENSE", "UPSTREAM-LICENSE", "build.py")]
         files += sorted((ROOT / "app").glob("*"))
         files += sorted((ROOT / "tests").glob("test_*.py"))
         for path in files:

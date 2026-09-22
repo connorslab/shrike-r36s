@@ -2,7 +2,7 @@
 
 An experimental handheld package for **[privkeyio/shrike](https://github.com/privkeyio/shrike)**, the Sparrow fork supporting BLAKE2b proof of work and unified opt-in signatures. This repository preserves its upstream source and history, adding the compatibility adapter in `ports/r36s/`.
 
-**Status:** experimental; normal Ports launch reaches the controls screen on an R36XS; a controller-mapping correction has host tests but still needs device acceptance. Begin with a disposable test wallet, not real funds.
+**Status:** experimental; the user confirmed normal launch and basic operation on an R36XS; wallet persistence, synchronization and signing acceptance remain outstanding. Begin with a disposable test wallet, not real funds.
 
 ## Install
 
@@ -72,3 +72,6 @@ GO-Super gamepads now use their ArkOS A/B and Select/Start layout. Startup error
 dialogs return automatically instead of waiting indefinitely for a keyboard.
 See [port instructions](ports/r36s/README.md) and [test evidence](ports/r36s/TESTING.md)
 for changes, installation and remaining device checks.
+
+Local `.local` server names now resolve through mDNS inside the private runtime.
+The upgrade also applies to existing installations; see the port instructions.
